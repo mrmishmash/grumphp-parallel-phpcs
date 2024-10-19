@@ -7,13 +7,17 @@ namespace Mishmash\GrumPHPParallelPhpCs\Task;
 use GrumPHP\Collection\ProcessArgumentsCollection;
 use GrumPHP\Exception\ExecutableNotFoundException;
 use GrumPHP\Fixer\Provider\FixableProcessResultProvider;
+use GrumPHP\Formatter\ProcessFormatterInterface;
+use GrumPHP\Process\ProcessBuilder;
 use GrumPHP\Process\TmpFileUsingProcessRunner;
 use GrumPHP\Runner\TaskResult;
-use GrumPHP\Task\AbstractExternalTask;
 use GrumPHP\Task\Config\ConfigOptionsResolver;
+use GrumPHP\Task\Config\EmptyTaskConfig;
+use GrumPHP\Task\Config\TaskConfigInterface;
 use GrumPHP\Task\Context\ContextInterface;
 use GrumPHP\Task\Context\GitPreCommitContext;
 use GrumPHP\Task\Context\RunContext;
+use GrumPHP\Task\TaskInterface;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Process\Exception\ProcessFailedException;
@@ -23,9 +27,20 @@ use GrumPHP\Runner\TaskResultInterface;
 /**
  * Same as 'Phpcs' task in GrumPHP just that it adds parallel option.
  */
-final class ParallelPhpCs extends AbstractExternalTask {
+final class ParallelPhpCs implements TaskInterface {
 
-  protected $formatter;
+  protected ProcessFormatterInterface $formatter;
+
+  protected TaskConfigInterface $config;
+
+  protected ProcessBuilder $processBuilder;
+
+  public function __construct(ProcessBuilder $processBuilder, ProcessFormatterInterface $formatter)
+  {
+    $this->config = new EmptyTaskConfig();
+    $this->processBuilder = $processBuilder;
+    $this->formatter = $formatter;
+  }
 
   /**
    * @return \GrumPHP\Task\Config\ConfigOptionsResolver
@@ -213,5 +228,18 @@ final class ParallelPhpCs extends AbstractExternalTask {
     } catch (\Exception) {
       return null;
     }
+  }
+
+  public function getConfig(): TaskConfigInterface
+  {
+    return $this->config;
+  }
+
+  public function withConfig(TaskConfigInterface $config): TaskInterface
+  {
+    $new = clone $this;
+    $new->config = $config;
+
+    return $new;
   }
 }
