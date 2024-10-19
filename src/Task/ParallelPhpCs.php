@@ -10,6 +10,7 @@ use GrumPHP\Fixer\Provider\FixableProcessResultProvider;
 use GrumPHP\Formatter\ProcessFormatterInterface;
 use GrumPHP\Process\TmpFileUsingProcessRunner;
 use GrumPHP\Runner\TaskResult;
+use GrumPHP\Task\AbstractExternalTask;
 use GrumPHP\Task\Config\ConfigOptionsResolver;
 use GrumPHP\Task\Context\ContextInterface;
 use GrumPHP\Task\Context\GitPreCommitContext;
@@ -23,9 +24,9 @@ use GrumPHP\Runner\TaskResultInterface;
 /**
  * Same as 'Phpcs' task in GrumPHP just that it adds parallel option.
  *
- * @extends \GrumPHP\Task\AbstractExternalTask<ProcessFormatterInterface>
+ * @extends AbstractExternalTask<ProcessFormatterInterface>
  */
-final class ParallelPhpCs extends \GrumPHP\Task\AbstractExternalTask {
+final class ParallelPhpCs extends AbstractExternalTask {
 
   protected $formatter;
 

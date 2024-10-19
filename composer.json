@@ -14,7 +14,8 @@
   },
   "autoload": {
     "psr-4": {
-      "Mishmash\\GrumPHPParallelPhpCs\\": "src/"
+      "Mishmash\\GrumPHPParallelPhpCs\\": "src/",
+      "Mishmash\\GrumPHPParallelPhpCs\\Task\\": "src/Task"
     }
   },
   "config": {
