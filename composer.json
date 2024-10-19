@@ -1,0 +1,30 @@
+{
+  "name": "mrmishmash/grumphp-parallel-phpcs",
+  "description": "An extension that basically copies the Phpcs task from GrumPHP and adds parallel support.",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Mihael Wagner",
+      "email": "miha.wagner@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^8.1",
+    "phpro/grumphp": "^2.8",
+    "symfony/process": "^7.0 || ^6.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "Mishmash\\GrumPHPParallelPhpCs\\": "src/"
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "phpro/grumphp": true
+    }
+  },
+  "require-dev": {
+    "php-cs-fixer/shim": "^3.64",
+    "phpunit/phpunit": "^11.3.5"
+  }
+}

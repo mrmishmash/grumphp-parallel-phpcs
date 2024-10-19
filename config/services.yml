@@ -1,0 +1,8 @@
+services:
+  Mishmash\GrumPHPParallelPhpCs\Task\ParallelPhpCs:
+    class: 'Mishmash\GrumPHPParallelPhpCs\Task\ParallelPhpCs'
+    arguments:
+      - '@process_builder'
+      - '@formatter.phpcs'
+    tags:
+      - { name: grumphp.task, task: phpcs_parallel }
