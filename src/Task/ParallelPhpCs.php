@@ -9,10 +9,13 @@ use GrumPHP\Exception\ExecutableNotFoundException;
 use GrumPHP\Fixer\Provider\FixableProcessResultProvider;
 use GrumPHP\Process\TmpFileUsingProcessRunner;
 use GrumPHP\Runner\TaskResult;
+use GrumPHP\Task\AbstractExternalTask;
+use GrumPHP\Task\Config\ConfigOptionsResolver;
 use GrumPHP\Task\Context\ContextInterface;
 use GrumPHP\Task\Context\GitPreCommitContext;
 use GrumPHP\Task\Context\RunContext;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use GrumPHP\Runner\TaskResultInterface;
@@ -20,15 +23,15 @@ use GrumPHP\Runner\TaskResultInterface;
 /**
  * Same as 'Phpcs' task in GrumPHP just that it adds parallel option.
  */
-final class ParallelPhpCs extends \GrumPHP\Task\AbstractExternalTask {
+final class ParallelPhpCs extends AbstractExternalTask {
 
   protected $formatter;
 
   /**
    * @return \GrumPHP\Task\Config\ConfigOptionsResolver
    */
-  public static function getConfigurableOptions(): \GrumPHP\Task\Config\ConfigOptionsResolver {
-    $resolver = new \Symfony\Component\OptionsResolver\OptionsResolver();
+  public static function getConfigurableOptions(): ConfigOptionsResolver {
+    $resolver = new OptionsResolver();
     $resolver->setDefaults(
       [
         'standard' => [],
@@ -65,7 +68,9 @@ final class ParallelPhpCs extends \GrumPHP\Task\AbstractExternalTask {
     $resolver->addAllowedTypes('show_sniffs_error_path', ['bool']);
     $resolver->addAllowedTypes('parallel', ['int', 'string']);
 
-    return \GrumPHP\Task\Config\ConfigOptionsResolver::fromOptionsResolver($resolver);
+    return ConfigOptionsResolver::fromClosure(
+      static fn(array $options): array => $resolver->resolve($options)
+    );
   }
 
   public function canRunInContext(ContextInterface $context): bool {
