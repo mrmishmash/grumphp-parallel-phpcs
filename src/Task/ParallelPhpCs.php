@@ -6,17 +6,15 @@ namespace Mishmash\GrumPHPParallelPhpCs\Task;
 
 use GrumPHP\Collection\ProcessArgumentsCollection;
 use GrumPHP\Exception\ExecutableNotFoundException;
-use GrumPHP\Fixer\Provider\FixableProcessProvider;
 use GrumPHP\Fixer\Provider\FixableProcessResultProvider;
 use GrumPHP\Formatter\ProcessFormatterInterface;
-use GrumPHP\Runner\FixableTaskResult;
+use GrumPHP\Process\TmpFileUsingProcessRunner;
 use GrumPHP\Runner\TaskResult;
 use GrumPHP\Task\AbstractExternalTask;
 use GrumPHP\Task\Config\ConfigOptionsResolver;
 use GrumPHP\Task\Context\ContextInterface;
 use GrumPHP\Task\Context\GitPreCommitContext;
 use GrumPHP\Task\Context\RunContext;
-use Mishmash\GrumPHPParallelPhpCs\Process\TmpFileUsingProcessRunner;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Process\Exception\ProcessFailedException;
@@ -91,7 +89,7 @@ final class ParallelPhpCs extends AbstractExternalTask {
       return TaskResult::createSkipped($this, $context);
     }
 
-    $process = TmpFileUsingProcessRunner::run(function (string $tmpFile) use ($config): Process {
+    $process = TmpFileUsingProcessRunner::run(function (string $tmpFile) use ($config): mixed {
       $parallelValue = $this->getParallelValue($config['parallel']);
 
       $arguments = $this->processBuilder->createArgumentsForCommand('phpcs');
@@ -114,7 +112,7 @@ final class ParallelPhpCs extends AbstractExternalTask {
       }
 
       if ($fixerProcess) {
-        return self::provideFixableProcess($failedResult, function () use ($fixerProcess): Process {
+        return FixableProcessResultProvider::provide($failedResult, function () use ($fixerProcess): mixed {
           return $fixerProcess;
         }, [0, 1]);
       }
@@ -128,7 +126,7 @@ final class ParallelPhpCs extends AbstractExternalTask {
   /**
    * @param array<int, string> $suggestedFiles
    */
-  private function createFixerProcess(array $suggestedFiles): ?Process
+  private function createFixerProcess(array $suggestedFiles): mixed
   {
     if (!$suggestedFiles) {
       return null;
@@ -224,28 +222,4 @@ final class ParallelPhpCs extends AbstractExternalTask {
     }
   }
 
-  /**
-   * @param callable(): Process $fixerProcessBuilder
-   */
-  public static function provideFixableProcess(
-    TaskResultInterface $taskResult,
-    callable $fixerProcessBuilder,
-    array $successExitCodes = [0]
-  ): FixableTaskResult {
-    $fixerProcess = $fixerProcessBuilder();
-    /** @psalm-suppress RedundantConditionGivenDocblockType */
-    assert($fixerProcess instanceof Process);
-
-    $fixerCommand = $fixerProcess->getCommandLine();
-    $fixerMessage = sprintf(
-      '%sYou can fix errors by running the following command:%s',
-      PHP_EOL . PHP_EOL,
-      PHP_EOL . $fixerCommand
-    );
-
-    return new FixableTaskResult(
-      $taskResult->withAppendedMessage($fixerMessage),
-      FixableProcessProvider::provide($fixerCommand, $successExitCodes)
-    );
-  }
 }
