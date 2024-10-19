@@ -9,7 +9,7 @@ use GrumPHP\Extension\ExtensionInterface;
 /**
  * Extension loader.
  */
-class GrumPHPParallelPhpCsExtension implements ExtensionInterface {
+final class GrumPHPParallelPhpCsExtension implements ExtensionInterface {
 
   /**
    * @return iterable

@@ -8,13 +8,13 @@ use GrumPHP\Collection\ProcessArgumentsCollection;
 use GrumPHP\Exception\ExecutableNotFoundException;
 use GrumPHP\Fixer\Provider\FixableProcessResultProvider;
 use GrumPHP\Formatter\ProcessFormatterInterface;
-use GrumPHP\Process\TmpFileUsingProcessRunner;
 use GrumPHP\Runner\TaskResult;
 use GrumPHP\Task\AbstractExternalTask;
 use GrumPHP\Task\Config\ConfigOptionsResolver;
 use GrumPHP\Task\Context\ContextInterface;
 use GrumPHP\Task\Context\GitPreCommitContext;
 use GrumPHP\Task\Context\RunContext;
+use Mishmash\GrumPHPParallelPhpCs\Process\TmpFileUsingProcessRunner;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Process\Exception\ProcessFailedException;
@@ -82,6 +82,7 @@ final class ParallelPhpCs extends AbstractExternalTask {
 
   public function run(ContextInterface $context): TaskResultInterface {
     $config = $this->getConfig()->getOptions();
+
     $files = $context->getFiles()->extensions($config['triggered_by'])->paths($config['whitelist_patterns'] ?? [])->notPaths($config['ignore_patterns'] ?? []);
 
     if (0 === \count($files)) {
@@ -89,10 +90,13 @@ final class ParallelPhpCs extends AbstractExternalTask {
     }
 
     $process = TmpFileUsingProcessRunner::run(function (string $tmpFile) use ($config): Process {
+      $parallelValue = $this->getParallelValue($config['parallel']);
+
       $arguments = $this->processBuilder->createArgumentsForCommand('phpcs');
       $arguments = $this->addArgumentsFromConfig($arguments, $config);
       $arguments->add('--report-json');
       $arguments->add('--file-list=' . $tmpFile);
+      $arguments->add('--parallel=' . $parallelValue);
       return $this->processBuilder->buildProcess($arguments);
     }, static function () use ($files): \Generator {
       (yield $files->toFileList());
