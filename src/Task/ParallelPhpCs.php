@@ -13,7 +13,6 @@ use GrumPHP\Task\Context\ContextInterface;
 use GrumPHP\Task\Context\GitPreCommitContext;
 use GrumPHP\Task\Context\RunContext;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
-use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use GrumPHP\Runner\TaskResultInterface;
@@ -29,7 +28,7 @@ final class ParallelPhpCs extends \GrumPHP\Task\AbstractExternalTask {
    * @return \GrumPHP\Task\Config\ConfigOptionsResolver
    */
   public static function getConfigurableOptions(): \GrumPHP\Task\Config\ConfigOptionsResolver {
-    $resolver = new OptionsResolver();
+    $resolver = new \Symfony\Component\OptionsResolver\OptionsResolver();
     $resolver->setDefaults(
       [
         'standard' => [],
