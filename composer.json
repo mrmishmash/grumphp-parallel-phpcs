@@ -10,12 +10,12 @@
   ],
   "require": {
     "php": "^8.1",
-    "phpro/grumphp": "^2.8"
+    "phpro/grumphp": "^2.8",
+    "symfony/process": "^6.4"
   },
   "autoload": {
     "psr-4": {
-      "Mishmash\\GrumPHPParallelPhpCs\\": "src/",
-      "Mishmash\\GrumPHPParallelPhpCs\\Task\\": "src/Task"
+      "Mishmash\\GrumPHPParallelPhpCs\\": "src/"
     }
   },
   "config": {

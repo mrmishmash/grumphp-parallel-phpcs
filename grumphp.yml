@@ -1,0 +1,6 @@
+grumphp:
+    tasks:
+        phpcs_parallel:
+            parallel: auto
+    extensions:
+        - 'Mishmash\GrumPHPParallelPhpCs\GrumPHPParallelPhpCsExtension'
