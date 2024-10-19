@@ -6,8 +6,10 @@ namespace Mishmash\GrumPHPParallelPhpCs\Task;
 
 use GrumPHP\Collection\ProcessArgumentsCollection;
 use GrumPHP\Exception\ExecutableNotFoundException;
+use GrumPHP\Fixer\Provider\FixableProcessProvider;
 use GrumPHP\Fixer\Provider\FixableProcessResultProvider;
 use GrumPHP\Formatter\ProcessFormatterInterface;
+use GrumPHP\Runner\FixableTaskResult;
 use GrumPHP\Runner\TaskResult;
 use GrumPHP\Task\AbstractExternalTask;
 use GrumPHP\Task\Config\ConfigOptionsResolver;
@@ -112,7 +114,7 @@ final class ParallelPhpCs extends AbstractExternalTask {
       }
 
       if ($fixerProcess) {
-        return FixableProcessResultProvider::provide($failedResult, function () use ($fixerProcess): Process {
+        return self::provideFixableProcess($failedResult, function () use ($fixerProcess): Process {
           return $fixerProcess;
         }, [0, 1]);
       }
@@ -220,5 +222,30 @@ final class ParallelPhpCs extends AbstractExternalTask {
     } catch (\Exception) {
       return null;
     }
+  }
+
+  /**
+   * @param callable(): Process $fixerProcessBuilder
+   */
+  public static function provideFixableProcess(
+    TaskResultInterface $taskResult,
+    callable $fixerProcessBuilder,
+    array $successExitCodes = [0]
+  ): FixableTaskResult {
+    $fixerProcess = $fixerProcessBuilder();
+    /** @psalm-suppress RedundantConditionGivenDocblockType */
+    assert($fixerProcess instanceof Process);
+
+    $fixerCommand = $fixerProcess->getCommandLine();
+    $fixerMessage = sprintf(
+      '%sYou can fix errors by running the following command:%s',
+      PHP_EOL . PHP_EOL,
+      PHP_EOL . $fixerCommand
+    );
+
+    return new FixableTaskResult(
+      $taskResult->withAppendedMessage($fixerMessage),
+      FixableProcessProvider::provide($fixerCommand, $successExitCodes)
+    );
   }
 }
